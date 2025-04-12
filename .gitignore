@@ -1,0 +1,7 @@
+venv/
+cuda_*.run
+segnet_pets.pth
+__pycache__/
+*.pyc
+data/
+Unet_Pytorch_Pets1.py
