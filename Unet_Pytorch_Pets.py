@@ -24,13 +24,9 @@ print(f"Using device: {device}")
 # Hyperparameters
 IMG_HEIGHT = 128
 IMG_WIDTH = 128
-# IMG_HEIGHT = 256
-# IMG_WIDTH = 256
 NUM_CLASSES = 3  # Foreground (pet), background, boundary
 BATCH_SIZE = 32
-# BATCH_SIZE = 16
-# NUM_EPOCHS = 30
-NUM_EPOCHS = 50
+NUM_EPOCHS = 350
 LEARNING_RATE = 0.001
 
 # -------------------
@@ -203,6 +199,11 @@ model = SegNet(in_channels=3, out_channels=NUM_CLASSES).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
+# Add StepLR scheduler
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=35, gamma=0.5)
+# step_size=10: Reduce the learning rate every 10 epochs
+# gamma=0.1: Multiply the learning rate by 0.1 (e.g., 0.0005 -> 0.00005 after 10 epochs)
+
 # -------------------
 # Training Loop
 # -------------------
@@ -230,6 +231,13 @@ for epoch in range(NUM_EPOCHS):
 
         if (i + 1) % 10 == 0:
             print(f"Epoch [{epoch + 1}/{NUM_EPOCHS}], Step [{i + 1}/{total_step}], Loss: {loss.item():.4f}")
+
+    # Step the scheduler after each epoch
+    scheduler.step()
+
+    # Print the current learning rate (added in the next snippet)
+    current_lr = optimizer.param_groups[0]['lr']
+    print(f"Epoch [{epoch + 1}/{NUM_EPOCHS}], Current Learning Rate: {current_lr:.8f}")
 
     epoch_time = time.time() - epoch_start_time
     print(f"Epoch [{epoch + 1}/{NUM_EPOCHS}] completed in {epoch_time:.2f} seconds, Average Loss: {running_loss / total_step:.4f}")
